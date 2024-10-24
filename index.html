@@ -590,8 +590,8 @@
                 <div class="input-div"><label for="Phone-2" class="form-label">Phone</label><input class="form-input w-input" maxlength="256" name="Phone" data-name="Phone" placeholder="" type="tel" id="Phone-2" required=""></div>
                 <div class="input-div"><label for="Message-2" class="form-label">Message</label><textarea id="Message-2" name="Message" maxlength="5000" data-name="Message" placeholder="" required="" class="form-input w-input"></textarea></div>
 	      	<input type="checkbox" name="botcheck" class="hidden" style="display: none;">
-		<input type="hidden" name="redirect" value="https://cutandcleaned.com/#contact">
 	      	<input type="submit" data-wait="Please wait..." class="submit-button w-button" value="Submit">
+		<p class="pending" id="result"></p>
               </form>
               <div class="success-message w-form-done">
                 <div class="success-text">Thank you for choosing Cut and Cleaned - we look forward to working with you!</div>
@@ -673,5 +673,56 @@
 top: calc(var(--width) / 1.19);
 }
 </style>
+<script>
+	/* Form Logic */
+
+const form = document.getElementById("form");
+const result = document.getElementById("result");
+
+form.addEventListener("submit", function (e) {
+  const formData = new FormData(form);
+  e.preventDefault();
+  var object = {};
+  formData.forEach((value, key) => {
+    object[key] = value;
+  });
+  var json = JSON.stringify(object);
+  result.innerHTML = "Please wait...";
+
+  fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: json
+  })
+    .then(async (response) => {
+      let json = await response.json();
+      if (response.status == 200) {
+        result.innerHTML = "Thank you for choosing Cut and Cleaned - we look forward to working with you!";
+        result.classList.remove("pending");
+        result.classList.add("success-message");
+      } else {
+        console.log(response);
+        result.innerHTML = "Something went wrong...";
+        result.classList.remove("pending");
+        result.classList.add("w-form-fail");
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      result.innerHTML = "Something went wrong!";
+    })
+    .then(function () {
+      form.reset();
+      setTimeout(() => {
+        result.style.display = "none";
+      }, 5000);
+    });
+});
+
+</script>
+</script>
 </body>
 </html>
